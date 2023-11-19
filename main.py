@@ -48,9 +48,9 @@ class FastVPN:
                 f"Please create a credentials.txt file with your FastVPN Network Credentials, username and password, else you will be prompted for them when connecting each time."
             )
             cmd = f"sudo openvpn --config {directory}/{selected_file}"
+            subprocess.run(cmd, shell=True)
 
         cmd = f"sudo openvpn --config {directory}/{selected_file} --auth-user-pass {self.creds}"
-
         subprocess.run(cmd, shell=True)
 
     def get_help(self):
