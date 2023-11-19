@@ -45,9 +45,9 @@ class FastVPN:
         if not self.creds.exists():
             print(f"Credentials file not found!")
             print(
-                f"Please create a credentials.txt file with your FastVPN Network Credentials, username and password"
+                f"Please create a credentials.txt file with your FastVPN Network Credentials, username and password, else you will be prompted for them when connecting each time."
             )
-            sys.exit(1)
+            cmd = f"sudo openvpn --config {directory}/{selected_file}"
 
         cmd = f"sudo openvpn --config {directory}/{selected_file} --auth-user-pass {self.creds}"
 
