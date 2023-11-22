@@ -15,16 +15,35 @@ class FastVPN:
         self.udp_dir = self.current_dir / "udp"
         self.creds = self.current_dir / "credentials.txt"
 
-    def get_file_list(self, directory):
+    # def get_file_list(self, directory):
+    #     file_list = []
+    #     try:
+    #         for file in directory.iterdir():
+    #             if file.is_file():
+    #                 file_list.append(file.name)
+    #         return file_list
+    #     except FileNotFoundError:
+    #         print(f"tcp / udp directory not found")
+    #         return None
+
+    def get_file_list(self, directory, component_index):
         file_list = []
         try:
             for file in directory.iterdir():
-                if file.is_file():
-                    file_list.append(file.name)
+                if file.is_file() and file.name.endswith(".ovpn"):
+                    file_components = file.name.split("-")
+                    if len(file_components) > component_index:
+                        file_list.append(file_components[component_index])
             return file_list
         except FileNotFoundError:
             print(f"tcp / udp directory not found")
             return None
+
+    def get_country_list(self, directory):
+        return self.get_file_list(directory, 1)
+
+    def get_city_list(self, directory):
+        return self.get_file_list(directory, 2)
 
     def get_random_file(self, file_list):
         if len(file_list) == 0:
@@ -89,4 +108,6 @@ class FastVPN:
 
 if __name__ == "__main__":
     fast_vpn = FastVPN()
-    fast_vpn.main()
+    # fast_vpn.main()
+    print(fast_vpn.get_city_list(fast_vpn.tcp_dir))
+    print(fast_vpn.get_country_list(fast_vpn.tcp_dir))
