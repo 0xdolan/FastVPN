@@ -159,3 +159,12 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 .DS_Store
+
+# FastVPN local secrets and downloaded server archives
+credentials.txt
+credentials_*.txt
+/groupedServerList.zip
+/serverListTCP.zip
+/serverListUDP.zip
+/tcp/
+/udp/

@@ -1,0 +1,37 @@
+[project]
+name = "fastvpn"
+version = "1.0.0"
+description = "Browse, fetch, and connect OpenVPN profiles from the terminal."
+readme = "README.md"
+license = "GPL-3.0-or-later"
+requires-python = ">=3.12"
+authors = [
+    { name = "Dolan H.", email = "0xdolan@gmail.com" }
+]
+keywords = ["openvpn", "vpn", "cli"]
+classifiers = [
+    "Environment :: Console",
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+    "Operating System :: POSIX",
+    "Programming Language :: Python :: 3",
+    "Topic :: System :: Networking",
+]
+dependencies = [
+    "rich>=13.9",
+    "rich-argparse>=1.6",
+]
+
+[project.scripts]
+fastvpn = "fastvpn.cli:main"
+
+[dependency-groups]
+dev = [
+    "pytest>=8",
+]
+
+[build-system]
+requires = ["uv_build>=0.9.18,<0.10.0"]
+build-backend = "uv_build"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
