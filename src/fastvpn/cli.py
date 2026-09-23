@@ -30,10 +30,13 @@ from fastvpn.connect import build_command, openvpn_binary, run_openvpn, use_sudo
 from fastvpn.console import (
     emit_json,
     make_console,
+    pin_scroll_below,
     print_error,
+    query_cursor_row,
     render_mapping,
     render_output,
     render_report,
+    reset_scroll_region,
 )
 from fastvpn.credentials import (
     CredentialRef,
@@ -735,7 +738,18 @@ def connect_command(
         return 0
     if not ctx.quiet and ctx.format != "json":
         ctx.err.print(Text("OpenVPN stays in this terminal. Press Ctrl+C to disconnect.", style="muted"))
-    code = run_openvpn(command, credentials_ref)
+    pinned = False
+    if not ctx.quiet and ctx.format == "table":
+        ctx.out.file.flush()
+        ctx.err.file.flush()
+        row = query_cursor_row()
+        if row is not None:
+            pinned = pin_scroll_below(row)
+    try:
+        code = run_openvpn(command, credentials_ref)
+    finally:
+        if pinned:
+            reset_scroll_region()
     if code != 0 and not ctx.quiet:
         ctx.err.print(Text(f"OpenVPN exited with status {code}.", style="warn"))
     return code

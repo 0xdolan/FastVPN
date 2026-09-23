@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import csv
 import json
+import shutil
 import sys
 from typing import Any
 
@@ -187,6 +188,73 @@ def render_mapping(
     for key, value in rows:
         table.add_row(key, text_cell(value))
     out.print(Panel(table, title=title, border_style=border, expand=False))
+
+
+def query_cursor_row() -> int | None:
+    """Return the 1-based cursor row, or None when the terminal cannot answer."""
+    if not sys.stdin.isatty() or not sys.stderr.isatty():
+        return None
+    try:
+        import termios
+        import tty
+    except ImportError:
+        return None
+
+    fd = sys.stdin.fileno()
+    try:
+        saved = termios.tcgetattr(fd)
+    except termios.error:
+        return None
+    try:
+        tty.setcbreak(fd)
+        sys.stderr.write("\033[6n")
+        sys.stderr.flush()
+        reply = ""
+        while True:
+            char = sys.stdin.read(1)
+            if not char:
+                return None
+            reply += char
+            if char == "R":
+                break
+            if len(reply) > 32:
+                return None
+    except (OSError, termios.error):
+        return None
+    finally:
+        try:
+            termios.tcsetattr(fd, termios.TCSADRAIN, saved)
+        except termios.error:
+            pass
+
+    if not reply.startswith("\033[") or ";" not in reply:
+        return None
+    try:
+        row_text = reply[2:].split(";", 1)[0]
+        row = int(row_text)
+    except ValueError:
+        return None
+    return row if row > 0 else None
+
+
+def pin_scroll_below(start_row: int) -> bool:
+    """Keep rows above ``start_row`` fixed; new output scrolls underneath."""
+    if not sys.stderr.isatty() or start_row < 2:
+        return False
+    height = shutil.get_terminal_size(fallback=(80, 24)).lines
+    if start_row >= height:
+        return False
+    sys.stderr.write(f"\033[{start_row};{height}r\033[{start_row};1H")
+    sys.stderr.flush()
+    return True
+
+
+def reset_scroll_region() -> None:
+    if not sys.stderr.isatty():
+        return
+    height = shutil.get_terminal_size(fallback=(80, 24)).lines
+    sys.stderr.write(f"\033[r\033[{height};1H")
+    sys.stderr.flush()
 
 
 def render_report(out: Console, err: Console, fmt: str, report: ImportReport, *, verbose: bool) -> None:

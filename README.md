@@ -30,6 +30,40 @@ OpenVPN is a separate package. On Debian or Ubuntu:
 sudo apt install openvpn
 ```
 
+### Shell setup
+
+If you keep a checkout at `~/FastVPN` (or any fixed path) and want `fastvpn` available from any directory, put one of these in `~/.zshrc` or `~/.bashrc`.
+
+Preferred. Puts the real `fastvpn` binary on `PATH`, so command highlighters show it in green, and points every run at that checkout:
+
+```zsh
+export FASTVPN_ROOT=$HOME/FastVPN
+path=($HOME/FastVPN/.venv/bin $path)
+```
+
+For bash, use:
+
+```bash
+export FASTVPN_ROOT=$HOME/FastVPN
+export PATH="$HOME/FastVPN/.venv/bin:$PATH"
+```
+
+Alternative. An alias also works. Some highlighters leave the name red because it is not a file on `PATH`, but the command still runs:
+
+```zsh
+alias fastvpn='FASTVPN_ROOT=$HOME/FastVPN $HOME/FastVPN/.venv/bin/fastvpn'
+```
+
+Reload the shell, then check:
+
+```bash
+source ~/.zshrc
+fastvpn list --limit 3
+fastvpn -t
+```
+
+`FASTVPN_ROOT` is required in both forms when you are not already inside the project directory. Without it, FastVPN looks under the current directory and then `~/.local/share/fastvpn`, so a run from `~` finds no profiles.
+
 The first panel tells you whether `openvpn` is on `PATH`, how many profiles were found, which directory will receive new profiles, and which username will be used. A fresh tree has no profiles yet. `fastvpn doctor` exits 1 in that case because the Profiles check fails. `fastvpn fetch` fills `tcp/` and `udp/`.
 
 ## Where files go
@@ -159,6 +193,8 @@ Country flags are combined with OR. City flags are combined with OR. Using both 
 Stdout shows a Connecting panel: protocol, place, virtual flag, file, path, and which username will be used. Stderr shows the exact command, then tells you OpenVPN will stay in this terminal. The process is `sudo openvpn --config PROFILE --auth-user-pass FILE` when you are not root and credentials exist. Root, or `--no-sudo`, drops `sudo`. `--no-auth` and a machine with no credentials drop `--auth-user-pass`, and OpenVPN prompts. Each `--ovpn-arg` is appended in order. The shell is not used.
 
 Ctrl+C returns 130. OpenVPN's own exit code is returned otherwise, and a non-zero code is repeated on stderr.
+
+In a normal interactive table session, the Connecting panel stays pinned at the top of the terminal. OpenVPN logs, including the sudo password prompt, scroll underneath it. `--quiet` and `--format json` skip that pinning.
 
 `--format json` prints `dry_run`, `server`, `credentials`, and `command` before OpenVPN starts. `--dry-run` stops after that object. `--quiet` prints a single `Connecting TCP filename` line.
 

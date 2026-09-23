@@ -4,6 +4,34 @@ This page lists every command, the variations of each command, what the program 
 
 Data goes to standard output. Hints, progress, prompts, and errors go to standard error. `--format json` is safe to pipe. A password is never written to either stream.
 
+## Shell setup
+
+When the project lives at a fixed path such as `~/FastVPN` and you want to run `fastvpn` from any directory, configure the shell with one of the following.
+
+Preferred. Export the profile root and put the installed binary on `PATH`. Command highlighters treat it as a real command (often green):
+
+```zsh
+export FASTVPN_ROOT=$HOME/FastVPN
+path=($HOME/FastVPN/.venv/bin $path)
+```
+
+Bash equivalent:
+
+```bash
+export FASTVPN_ROOT=$HOME/FastVPN
+export PATH="$HOME/FastVPN/.venv/bin:$PATH"
+```
+
+Alternative. An alias works the same way at runtime. Some highlighters leave the name red because it is not found as a file on `PATH`:
+
+```zsh
+alias fastvpn='FASTVPN_ROOT=$HOME/FastVPN $HOME/FastVPN/.venv/bin/fastvpn'
+```
+
+Reload with `source ~/.zshrc` (or `source ~/.bashrc`), then `fastvpn list` and `fastvpn -t`.
+
+`FASTVPN_ROOT` tells FastVPN which directory holds `tcp/`, `udp/`, and `credentials.txt`. Without it, a run from outside the project only sees the current directory tree and `~/.local/share/fastvpn`, so `fastvpn -t` reports that no configuration matched.
+
 ## Exit codes
 
 | Code | When |
@@ -169,6 +197,8 @@ OpenVPN's own log follows on the terminal. The process stays in the foreground u
 ```
 
 `--dry-run` prints that object or the panel and does not start OpenVPN. Environment credentials are shown as the argument `<environment>` and no temporary auth file is created.
+
+In a normal interactive table session, FastVPN pins the Connecting panel (and the short hints under it) at the top of the terminal. OpenVPN's own log lines, including a sudo password prompt, scroll in the region below that header. The pin is skipped for `--quiet`, `--format json`, `--dry-run`, and non-interactive terminals.
 
 ### OpenVPN process
 
@@ -611,7 +641,7 @@ fastvpn connect --help
 
 | Variable | Effect |
 | --- | --- |
-| `FASTVPN_ROOT` | The only profile root, unless you also pass `--config-dir`. Same role as `--root`. |
+| `FASTVPN_ROOT` | The only profile root, unless you also pass `--config-dir`. Same role as `--root`. Set this in the shell when `fastvpn` is on `PATH` but you are not inside the project directory. |
 | `FASTVPN_CONFIG_HOME` | The config directory itself, not its parent. Overrides `XDG_CONFIG_HOME/fastvpn`. |
 | `FASTVPN_DATA_HOME` | The data directory itself. Overrides `XDG_DATA_HOME/fastvpn`. |
 | `FASTVPN_CACHE_HOME` | The cache directory itself. Overrides `XDG_CACHE_HOME/fastvpn`. |
